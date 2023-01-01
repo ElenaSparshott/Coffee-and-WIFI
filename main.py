@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField
@@ -14,15 +14,10 @@ class CafeForm(FlaskForm):
     cafe = StringField('Cafe name', validators=[DataRequired()])
     location = StringField('Location', validators=[DataRequired(), url()])
     coffee = SelectField('Coffee', choices=['', '☕️', '☕️☕️', '☕️☕️☕️', '☕️☕️☕️☕️', '☕️☕️☕️☕️☕️'])
+    power = SelectField('Power', choices=['', '️🔌', '🔌🔌', '🔌🔌🔌️', '🔌🔌🔌🔌', '🔌🔌🔌🔌🔌'])
+    wifi = SelectField('Wifi', choices=['', '️💪', '💪💪', '💪💪💪', '💪💪💪💪️', '💪💪💪💪💪'])
     submit = SubmitField('Submit')
 
-# Exercise:
-# add: Location URL, open time, closing time, coffee rating, wifi rating, power outlet rating fields
-# make coffee/wifi/power a select element with choice of 0 to 5.
-#e.g. You could use emojis ☕️/💪/✘/🔌
-# make all fields required except submit
-# use a validator to check that the URL field has a URL entered.
-# ---------------------------------------------------------------------------
 
 
 # all Flask routes below
@@ -31,11 +26,23 @@ def home():
     return render_template("index.html")
 
 
-@app.route('/add')
+@app.route('/add', methods=['GET', 'POST'])
 def add_cafe():
     form = CafeForm()
+
     if form.validate_on_submit():
-        print("True")
+        name = form.data["cafe"]
+        location = form.data['location']
+        coffee = form.data['coffee']
+        power = form.data['power']
+        wifi = form.data['wifi']
+
+        f = open("cafe-data.csv", "a")
+        f.write(f'\n{name},{location},{coffee},{wifi},{power}')
+        f.close()
+
+        return redirect(url_for('add_cafe'))
+
     # Exercise:
     # Make the form write a new row into cafe-data.csv
     # with   if form.validate_on_submit()
